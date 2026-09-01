@@ -1,0 +1,1057 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>学生考勤（周三/周四）</title>
+    <style>
+      :root {
+        --bg: #f3f4f6;
+        --card: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #2563eb;
+        --accent-soft: #e0edff;
+        --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+        --radius: 16px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC",
+          "Microsoft YaHei", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 22px 14px 30px;
+      }
+
+      .board {
+        background: var(--card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        overflow: hidden;
+      }
+
+      header {
+        padding: 16px 18px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      header .hint {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .content {
+        padding: 16px 18px 18px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.25fr 0.75fr;
+        gap: 14px;
+      }
+
+      @media (max-width: 980px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px;
+        background: #f9fafb;
+      }
+
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 180px;
+        flex: 1;
+      }
+
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      input[type="file"],
+      input[type="date"],
+      input[type="text"],
+      select {
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.6);
+        background: #ffffff;
+        padding: 8px 10px;
+        font-size: 13px;
+        outline: none;
+      }
+
+      select {
+        cursor: pointer;
+      }
+
+      .btn {
+        border-radius: 10px;
+        border: none;
+        padding: 10px 12px;
+        font-size: 13px;
+        cursor: pointer;
+        background: #e5e7eb;
+        color: #111827;
+        white-space: nowrap;
+      }
+
+      .btn.primary {
+        background: var(--accent);
+        color: #eff6ff;
+      }
+
+      .btn.danger {
+        background: #fef2f2;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #b91c1c;
+      }
+
+      .meta {
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .stat-strip {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      .stat {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+        text-align: left;
+      }
+
+      .stat .label {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+
+      .stat .value {
+        font-weight: 800;
+        font-size: 18px;
+      }
+
+      .notice {
+        margin-top: 10px;
+        padding: 10px 12px;
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        background: rgba(37, 99, 235, 0.06);
+        border-radius: 12px;
+        font-size: 12px;
+        color: #1d4ed8;
+      }
+
+      .table-wrap {
+        margin-top: 12px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        background: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+
+      thead th {
+        background: #f9fafb;
+        color: var(--muted);
+        font-weight: 700;
+        font-size: 12px;
+        border-bottom: 1px solid var(--border);
+        padding: 10px 10px;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      tbody td {
+        padding: 10px 10px;
+        border-bottom: 1px solid rgba(229, 231, 235, 0.7);
+        vertical-align: middle;
+      }
+
+      tbody tr:hover {
+        background: rgba(37, 99, 235, 0.04);
+      }
+
+      tbody tr[data-student-id] {
+        cursor: pointer;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+      }
+
+      .badge.miss {
+        border-color: rgba(249, 115, 22, 0.35);
+        background: rgba(249, 115, 22, 0.08);
+        color: #c2410c;
+        font-weight: 700;
+      }
+
+      .badge.ok {
+        border-color: rgba(16, 185, 129, 0.25);
+        background: rgba(16, 185, 129, 0.07);
+        color: #047857;
+        font-weight: 700;
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+
+      .toolbar-left,
+      .toolbar-right {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .pager {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .pager .page-info {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        background: rgba(17, 24, 39, 0.88);
+        color: #fff;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        max-width: 420px;
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="board">
+        <header>
+          <div>
+            <h1>学生考勤（周三/周四）</h1>
+            <div class="hint">导入学生 -> 生成本周三/周四“全部到” -> 点击切换为“未到”（本地保存）</div>
+          </div>
+          <div class="hint" id="autosaveHint"></div>
+        </header>
+
+        <div class="content">
+          <div class="grid">
+            <div class="card">
+              <div class="row" style="justify-content: space-between">
+                <div class="field" style="min-width: 260px; flex: 1.3">
+                  <label>1) 上传学生名单 CSV</label>
+                  <input
+                    type="file"
+                    id="csvFile"
+                    accept=".csv,text/csv"
+                  />
+                </div>
+                <div class="field">
+                  <label>2) 选择周三/周四日期</label>
+                  <input type="date" id="dateInput" />
+                </div>
+              </div>
+
+              <div style="margin-top: 12px">
+                <div class="row" style="align-items: flex-end">
+                  <div class="field">
+                    <label>姓名列</label>
+                    <select id="colName"></select>
+                  </div>
+                  <div class="field">
+                    <label>班级列（可选）</label>
+                    <select id="colClass"></select>
+                  </div>
+                </div>
+
+                <div class="row" style="margin-top: 10px">
+                  <button class="btn primary" id="importBtn" type="button">
+                    确认导入
+                  </button>
+                  <button class="btn" id="generateBtn" type="button" disabled>
+                    生成周三/周四初始考勤（全部到）
+                  </button>
+                  <button class="btn" id="exportMissBtn" type="button" disabled>
+                    导出本周未到名单（纯文本）
+                  </button>
+                  <span class="meta" id="studentsMeta">未导入学生名单</span>
+                </div>
+
+                <div class="notice" id="weekNotice">
+                  当前页面只支持“周三/周四”考勤。若选择的日期不是周三/周四，将自动纠正为最近的周三/周四。
+                </div>
+              </div>
+
+              <div class="stat-strip">
+                <div class="stat">
+                  <div class="label">当前日期：未到人数</div>
+                  <div class="value" id="missCount">0</div>
+                </div>
+                <div class="stat">
+                  <div class="label">当前日期：到人数</div>
+                  <div class="value" id="okCount">0</div>
+                </div>
+              </div>
+
+              <div class="toolbar">
+                <div class="toolbar-left">
+                  <div class="field" style="min-width: 260px; flex: 1">
+                    <label>搜索（姓名/班级）</label>
+                    <input type="text" id="searchInput" placeholder="例如：张三 / 计科二班" />
+                  </div>
+                  <div class="field" style="min-width: 140px; flex: 0.5">
+                    <label>每页条数</label>
+                    <select id="pageSize">
+                      <option value="50">50</option>
+                      <option value="100" selected>100</option>
+                      <option value="200">200</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="toolbar-right">
+                  <div class="pager">
+                    <button class="btn" id="prevBtn" type="button" disabled>上一页</button>
+                    <div class="page-info" id="pageInfo">0 / 0</div>
+                    <button class="btn" id="nextBtn" type="button" disabled>下一页</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="table-wrap" role="region" aria-label="考勤表格">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 160px">姓名</th>
+                      <th>班级</th>
+                      <th style="width: 160px">状态（未到）</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="row" style="justify-content: space-between">
+                <div>
+                  <div style="font-weight: 800; margin-bottom: 8px">使用说明</div>
+                  <div class="meta">
+                    1. 上传 CSV 后，在下方选择“姓名/班级列”。<br />
+                    2. 点击“生成周三/周四初始考勤（全部到）”。<br />
+                    3. 表格中点击某位学生切换：被标记为“未到”的为缺勤。<br />
+                    4. 所有数据仅保存在当前浏览器（`localStorage`）。
+                  </div>
+                </div>
+              </div>
+
+              <div class="notice" style="margin-top: 12px">
+                CSV 解析说明：支持带引号的逗号字段。建议第一行是表头（包含列名）。
+              </div>
+
+              <div style="margin-top: 12px" class="meta">
+                默认自动匹配：列名包含“姓名/name”为姓名；包含“班级/class”为班级（可选）。
+              </div>
+
+              <div style="margin-top: 12px" class="meta">
+                记录模型：每个周三/周四保存“未到学生ID集合”（因此只有“未到”这个显式状态）。
+              </div>
+
+              <div style="margin-top: 12px" class="row">
+                <button class="btn danger" id="resetLocalBtn" type="button">
+                  清空本地考勤数据
+                </button>
+              </div>
+              <div class="meta" style="margin-top: 8px">
+                注意：清空后需要重新导入学生并重新生成周三/周四考勤。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const LS_STUDENTS = "attendance_v1_students";
+      const LS_RECORDS = "attendance_v1_records";
+
+      // PWA: 注册 Service Worker（用于离线缓存）
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .catch(() => {
+            // 可能由于非安全上下文（http）导致注册失败，不影响功能使用。
+          });
+      }
+
+      const csvFile = document.getElementById("csvFile");
+      const importBtn = document.getElementById("importBtn");
+      const generateBtn = document.getElementById("generateBtn");
+      const exportMissBtn = document.getElementById("exportMissBtn");
+      const dateInput = document.getElementById("dateInput");
+      const colName = document.getElementById("colName");
+      const colClass = document.getElementById("colClass");
+      const studentsMeta = document.getElementById("studentsMeta");
+      const missCountEl = document.getElementById("missCount");
+      const okCountEl = document.getElementById("okCount");
+      const tbody = document.getElementById("tbody");
+      const searchInput = document.getElementById("searchInput");
+      const pageSizeEl = document.getElementById("pageSize");
+      const prevBtn = document.getElementById("prevBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const pageInfo = document.getElementById("pageInfo");
+      const toastEl = document.getElementById("toast");
+      const resetLocalBtn = document.getElementById("resetLocalBtn");
+      const autosaveHint = document.getElementById("autosaveHint");
+
+      let students = [];
+      // records: { [YYYY-MM-DD]: { missIds: string[] } }
+      let records = {};
+
+      // Loaded but not yet confirmed from CSV
+      let pendingCsv = null; // { headers: string[], rows: string[][] }
+
+      let filtered = [];
+      let currentPage = 1;
+      let pageSize = parseInt(pageSizeEl.value, 10);
+
+      function showToast(msg) {
+        toastEl.textContent = msg;
+        toastEl.style.display = "block";
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => {
+          toastEl.style.display = "none";
+        }, 2200);
+      }
+
+      function setOptions(selectEl, options) {
+        selectEl.innerHTML = "";
+        options.forEach((opt) => {
+          const o = document.createElement("option");
+          o.value = opt.value;
+          o.textContent = opt.label;
+          selectEl.appendChild(o);
+        });
+      }
+
+      function detectDefaultColumn(headers) {
+        const norm = (s) => String(s || "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "");
+
+        const idKeywords = ["学号", "学籍号", "id", "studentid", "student_id", "sid"];
+        const nameKeywords = ["姓名", "name", "fullname", "studentname"];
+        const classKeywords = ["班级", "class", "clazz", "group"];
+
+        const findBest = (keywords) => {
+          const headerNorms = headers.map((h) => norm(h));
+          for (const k of keywords) {
+            const idx = headerNorms.findIndex((h) => h.includes(norm(k)));
+            if (idx >= 0) return headers[idx];
+          }
+          return null;
+        };
+
+        return {
+          id: findBest(idKeywords),
+          name: findBest(nameKeywords),
+          class: findBest(classKeywords)
+        };
+      }
+
+      function csvParse(text) {
+        // A small CSV parser that handles quotes and commas/newlines inside quotes.
+        // Returns rows: string[][] without trimming inside quotes.
+        const rows = [];
+        let i = 0;
+        let field = "";
+        let row = [];
+        let inQuotes = false;
+
+        const pushField = () => {
+          row.push(field);
+          field = "";
+        };
+        const pushRow = () => {
+          // Ignore fully empty last line
+          if (row.length === 1 && row[0] === "" && rows.length > 0) return;
+          rows.push(row);
+          row = [];
+        };
+
+        while (i < text.length) {
+          const ch = text[i];
+          if (inQuotes) {
+            if (ch === '"') {
+              const next = text[i + 1];
+              if (next === '"') {
+                field += '"';
+                i += 2;
+                continue;
+              }
+              inQuotes = false;
+              i += 1;
+              continue;
+            }
+            field += ch;
+            i += 1;
+            continue;
+          }
+
+          if (ch === '"') {
+            inQuotes = true;
+            i += 1;
+            continue;
+          }
+
+          if (ch === ",") {
+            pushField();
+            i += 1;
+            continue;
+          }
+
+          if (ch === "\r") {
+            i += 1;
+            continue;
+          }
+
+          if (ch === "\n") {
+            pushField();
+            pushRow();
+            i += 1;
+            continue;
+          }
+
+          field += ch;
+          i += 1;
+        }
+
+        // Final
+        if (field !== "" || row.length) {
+          pushField();
+          pushRow();
+        }
+
+        return rows;
+      }
+
+      function loadLocal() {
+        try {
+          const s = localStorage.getItem(LS_STUDENTS);
+          const r = localStorage.getItem(LS_RECORDS);
+          students = s ? JSON.parse(s) : [];
+          records = r ? JSON.parse(r) : {};
+        } catch (e) {
+          console.warn(e);
+        }
+      }
+
+      function saveStudents() {
+        localStorage.setItem(LS_STUDENTS, JSON.stringify(students));
+      }
+
+      function saveRecords() {
+        localStorage.setItem(LS_RECORDS, JSON.stringify(records));
+      }
+
+      function normalizeDate(dateStr) {
+        return String(dateStr || "").trim();
+      }
+
+      function isWedOrThu(dateStr) {
+        // dateStr format: YYYY-MM-DD
+        const d = new Date(dateStr + "T00:00:00");
+        const day = d.getDay(); // 0 Sun ... 3 Wed ... 4 Thu
+        return day === 3 || day === 4;
+      }
+
+      function toYYYYMMDD(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${y}-${m}-${day}`;
+      }
+
+      function nextWedOrThu(fromDate) {
+        // Return next allowed day (including if already allowed).
+        const d = new Date(fromDate.getTime());
+        const day = d.getDay();
+        const allowed = [3, 4]; // Wed / Thu
+        let bestDelta = Infinity;
+        let bestTarget = 3;
+        allowed.forEach((t) => {
+          const delta = (t - day + 7) % 7;
+          if (delta < bestDelta) {
+            bestDelta = delta;
+            bestTarget = t;
+          }
+        });
+        d.setDate(d.getDate() + bestDelta);
+        return d;
+      }
+
+      function initDateInput() {
+        const now = new Date();
+        const d = nextWedOrThu(now);
+        dateInput.value = toYYYYMMDD(d);
+      }
+
+      function correctDateToWedOrThu() {
+        const v = normalizeDate(dateInput.value);
+        if (!v) return;
+        if (isWedOrThu(v)) return;
+        const d = new Date(v + "T00:00:00");
+        const fixed = nextWedOrThu(d);
+        dateInput.value = toYYYYMMDD(fixed);
+        showToast("已将日期自动纠正为最近的周三/周四。");
+      }
+
+      function currentMissSet(dateStr) {
+        const v = normalizeDate(dateStr);
+        if (!records[v]) records[v] = { missIds: [] };
+        return new Set(records[v].missIds || []);
+      }
+
+      function updateCounts() {
+        const v = normalizeDate(dateInput.value);
+        const missSet = currentMissSet(v);
+        const missCount = missSet.size;
+        missCountEl.textContent = missCount;
+        okCountEl.textContent = Math.max(0, students.length - missCount);
+        generateBtn.disabled = students.length === 0;
+        exportMissBtn.disabled = students.length === 0;
+      }
+
+      function applySearch() {
+        const q = String(searchInput.value || "").trim().toLowerCase();
+        if (!q) {
+          filtered = students.slice();
+        } else {
+          filtered = students.filter((s) => {
+            return (
+              String(s.name || "").toLowerCase().includes(q) ||
+              String(s.className || "").toLowerCase().includes(q)
+            );
+          });
+        }
+      }
+
+      function renderTable() {
+        const v = normalizeDate(dateInput.value);
+        const missSet = currentMissSet(v);
+
+        pageSize = parseInt(pageSizeEl.value, 10);
+        const total = filtered.length;
+        const totalPages = Math.max(1, Math.ceil(total / pageSize));
+        currentPage = Math.min(currentPage, totalPages);
+
+        const start = (currentPage - 1) * pageSize;
+        const end = Math.min(total, start + pageSize);
+        const slice = filtered.slice(start, end);
+
+        tbody.innerHTML = "";
+        const frag = document.createDocumentFragment();
+        slice.forEach((s) => {
+          const tr = document.createElement("tr");
+          tr.dataset.studentId = s.id;
+
+          const miss = missSet.has(s.id);
+          const statusBadge = document.createElement("span");
+          statusBadge.className = "badge " + (miss ? "miss" : "ok");
+          statusBadge.textContent = miss ? "未到" : "到";
+
+          tr.innerHTML = `
+            <td>${escapeHtml(String(s.name || ""))}</td>
+            <td>${escapeHtml(String(s.className || ""))}</td>
+            <td></td>
+          `;
+          tr.children[2].appendChild(statusBadge);
+
+          frag.appendChild(tr);
+        });
+        tbody.appendChild(frag);
+
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= totalPages;
+        pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        updateCounts();
+      }
+
+      function escapeHtml(s) {
+        return s.replace(/[&<>"']/g, (c) => {
+          switch (c) {
+            case "&":
+              return "&amp;";
+            case "<":
+              return "&lt;";
+            case ">":
+              return "&gt;";
+            case '"':
+              return "&quot;";
+            case "'":
+              return "&#39;";
+            default:
+              return c;
+          }
+        });
+      }
+
+      function setStudentsMeta() {
+        if (!students.length) {
+          studentsMeta.textContent = "未导入学生名单";
+          missCountEl.textContent = "0";
+          okCountEl.textContent = "0";
+          generateBtn.disabled = true;
+        } else {
+          studentsMeta.textContent = `已导入 ${students.length} 名学生`;
+          generateBtn.disabled = !dateInput.value;
+        }
+      }
+
+      async function handleCsvFile(file) {
+        const text = await file.text();
+        const rows = csvParse(text);
+        if (!rows.length) {
+          showToast("CSV 解析失败：没有读到数据。");
+          return;
+        }
+
+        const headers = rows[0].map((h) => String(h || "").trim());
+        if (headers.length < 2) {
+          showToast("CSV 表头列数不足，请确保第一行是表头。");
+          return;
+        }
+
+        const dataRows = rows.slice(1).filter((r) => r.some((c) => String(c || "").trim() !== ""));
+        pendingCsv = { headers, rows: dataRows };
+
+        const defaults = detectDefaultColumn(headers);
+        const options = headers.map((h, idx) => ({ value: String(idx), label: h || `列${idx + 1}` }));
+
+        setOptions(colName, options);
+        setOptions(colClass, [{ value: "", label: "（不选）" }, ...options]);
+
+        const pickIndex = (headerName) => {
+          if (!headerName) return null;
+          const idx = headers.findIndex((h) => String(h || "").trim() === headerName);
+          return idx >= 0 ? String(idx) : null;
+        };
+
+        const nameIdx = pickIndex(defaults.name);
+        const classIdx = pickIndex(defaults.class);
+
+        if (nameIdx) colName.value = nameIdx;
+        if (classIdx) colClass.value = classIdx;
+
+        showToast(`已读取 CSV：${dataRows.length} 行（等待你确认导入）`);
+      }
+
+      function confirmImport() {
+        if (!pendingCsv) {
+          showToast("请先上传 CSV。");
+          return;
+        }
+        const nameIndex = colName.value;
+        const classIndex = colClass.value;
+
+        const nameIdx = parseInt(nameIndex, 10);
+        const classIdx = classIndex === "" ? null : parseInt(classIndex, 10);
+
+        if (!Number.isFinite(nameIdx)) {
+          showToast("请先选择姓名列。");
+          return;
+        }
+
+        const { headers, rows } = pendingCsv;
+
+        const built = [];
+        // 无需学号：用“行号”生成内部ID，用于本地保存/切换到/未到状态。
+        rows.forEach((r, rowIdx) => {
+          const name = String(r[nameIdx] ?? "").trim();
+          const className = classIdx === null ? "" : String(r[classIdx] ?? "").trim();
+          if (!name) return;
+          const id = `auto_${rowIdx}`;
+          built.push({ id, name, className });
+        });
+
+        students = built;
+        pendingCsv = null;
+
+        saveStudents();
+        setStudentsMeta();
+
+        filtered = students.slice();
+        currentPage = 1;
+        renderTable();
+
+        generateBtn.disabled = students.length === 0;
+        showToast("学生名单导入成功。");
+      }
+
+      function generateInitialForDate() {
+        const v = normalizeDate(dateInput.value);
+        if (!v) return;
+        if (!isWedOrThu(v)) {
+          correctDateToWedOrThu();
+          return;
+        }
+        if (!students.length) {
+          showToast("请先导入学生名单。");
+          return;
+        }
+
+        const existing = (records[v] && records[v].missIds) || [];
+        if (existing.length) {
+          const ok = confirm("该日期已有“未到”记录。是否覆盖为“全部到”？");
+          if (!ok) return;
+        }
+
+        // “全部到”= 未到集合为空
+        records[v] = { missIds: [] };
+        saveRecords();
+
+        filtered = filtered.length ? filtered : students.slice();
+        renderTable();
+        showToast("已生成初始考勤：全部到。");
+      }
+
+      function toggleMiss(studentId) {
+        const v = normalizeDate(dateInput.value);
+        if (!v) return;
+        if (!isWedOrThu(v)) {
+          correctDateToWedOrThu();
+          return;
+        }
+        if (!records[v]) records[v] = { missIds: [] };
+        const missSet = currentMissSet(v);
+
+        if (missSet.has(studentId)) {
+          missSet.delete(studentId);
+        } else {
+          missSet.add(studentId);
+        }
+        records[v].missIds = Array.from(missSet);
+        saveRecords();
+        updateCounts();
+
+        // Update only current table rows (best-effort)
+        const tr = tbody.querySelector(`tr[data-student-id="${CSS.escape(studentId)}"]`);
+        if (tr) {
+          const badge = tr.querySelector(".badge");
+          const miss = missSet.has(studentId);
+          badge.classList.toggle("miss", miss);
+          badge.classList.toggle("ok", !miss);
+          badge.textContent = miss ? "未到" : "到";
+        }
+      }
+
+      function exportMissList() {
+        const v = normalizeDate(dateInput.value);
+        if (!v) {
+          showToast("请先选择周三/周四日期。");
+          return;
+        }
+        if (!students.length) {
+          showToast("请先导入学生名单。");
+          return;
+        }
+
+        const missSet = currentMissSet(v);
+        const missIds = Array.from(missSet);
+
+        const idToStudent = new Map(students.map((s) => [s.id, s]));
+        const lines = [];
+
+        // 按班级聚合：每个班只输出一行
+        const clsToNames = new Map(); // cls -> [name,...]
+        missIds.forEach((id) => {
+          const st = idToStudent.get(id);
+          if (!st) return;
+          const cls = String(st.className || "").replace(/[\r\n]+/g, " ").trim();
+          const name = String(st.name || "").replace(/[\r\n]+/g, " ").trim();
+          if (!name) return;
+          const key = cls || "未分班";
+          if (!clsToNames.has(key)) clsToNames.set(key, []);
+          clsToNames.get(key).push(name);
+        });
+
+        clsToNames.forEach((names, cls) => {
+          lines.push(`${cls}:${names.join("、")}`);
+        });
+
+        const txt = lines.join("\n");
+        const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `未到名单.txt`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        URL.revokeObjectURL(url);
+
+        showToast(`已导出未到名单：${missIds.length} 人。`);
+      }
+
+      function resetLocalData() {
+        const ok = confirm("确定要清空本地考勤数据和学生名单吗？");
+        if (!ok) return;
+        students = [];
+        records = {};
+        pendingCsv = null;
+        localStorage.removeItem(LS_STUDENTS);
+        localStorage.removeItem(LS_RECORDS);
+        setStudentsMeta();
+        filtered = [];
+        tbody.innerHTML = "";
+        generateBtn.disabled = true;
+        exportMissBtn.disabled = true;
+        missCountEl.textContent = "0";
+        okCountEl.textContent = "0";
+        showToast("已清空本地数据。");
+      }
+
+      function syncPagingAndRender() {
+        applySearch();
+        currentPage = 1;
+        renderTable();
+      }
+
+      // Events
+      csvFile.addEventListener("change", async () => {
+        const file = csvFile.files && csvFile.files[0];
+        if (!file) return;
+        try {
+          await handleCsvFile(file);
+        } catch (e) {
+          console.error(e);
+          showToast("读取 CSV 失败，请检查文件格式。");
+        }
+      });
+
+      importBtn.addEventListener("click", confirmImport);
+      generateBtn.addEventListener("click", generateInitialForDate);
+      exportMissBtn.addEventListener("click", exportMissList);
+
+      dateInput.addEventListener("change", () => {
+        correctDateToWedOrThu();
+        currentPage = 1;
+        renderTable();
+      });
+
+      searchInput.addEventListener("input", () => syncPagingAndRender());
+      pageSizeEl.addEventListener("change", () => {
+        currentPage = 1;
+        renderTable();
+      });
+      prevBtn.addEventListener("click", () => {
+        currentPage = Math.max(1, currentPage - 1);
+        renderTable();
+      });
+      nextBtn.addEventListener("click", () => {
+        currentPage = currentPage + 1;
+        renderTable();
+      });
+
+      tbody.addEventListener("click", (e) => {
+        const tr = e.target.closest("tr[data-student-id]");
+        if (!tr) return;
+        const id = tr.dataset.studentId;
+        toggleMiss(id);
+      });
+
+      resetLocalBtn.addEventListener("click", resetLocalData);
+
+      // Init
+      loadLocal();
+      initDateInput();
+      autosaveHint.textContent = "自动保存：已启用（localStorage）";
+
+      setStudentsMeta();
+      filtered = students.slice();
+      applySearch();
+      renderTable();
+
+      // Disable actions until CSV columns are chosen; import enables only after pendingCsv.
+      importBtn.disabled = false; // allow clicking; will warn if no pendingCsv
+      generateBtn.disabled = students.length === 0;
+    </script>
+  </body>
+</html>
+
